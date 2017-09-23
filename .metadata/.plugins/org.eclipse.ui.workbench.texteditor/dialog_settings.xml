@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
+		<item value="false" key="isRegEx"/>
+		<item value="" key="selection"/>
+		<item value="false" key="casesensitive"/>
+		<item value="false" key="incremental"/>
+		<item value="true" key="wrap"/>
+		<item value="false" key="wholeword"/>
+		<list key="findhistory">
+			<item value="setslot"/>
+			<item value="fields"/>
+			<item value="modifyrecordid"/>
+			<item value="hashcode"/>
+			<item value="hascode"/>
+			<item value="tditem"/>
+			<item value="tditems"/>
+			<item value="iterator"/>
+		</list>
+		<list key="replacehistory">
+		</list>
+	</section>
+	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">
+		<item value="310" key="DIALOG_WIDTH"/>
+		<item value="1|Segoe UI|9.163636|0|WINDOWS|1|-14|0|0|0|400|0|0|0|1|0|0|0|0|Segoe UI" key="DIALOG_FONT_NAME"/>
+		<item value="413" key="DIALOG_HEIGHT"/>
+		<item value="1349" key="DIALOG_X_ORIGIN"/>
+		<item value="282" key="DIALOG_Y_ORIGIN"/>
+	</section>
+</section>
