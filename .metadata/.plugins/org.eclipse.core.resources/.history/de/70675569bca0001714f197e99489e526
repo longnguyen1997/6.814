@@ -1,0 +1,77 @@
+package simpledb;
+
+import java.util.Iterator;
+
+public class HeapFileIterator extends AbstractDbFileIterator {
+	
+	// Class variables.
+	private boolean openStatus = false;
+	private int currentPage = 0;
+	private Iterator<Tuple> currentPageIterator;
+	private final int tableId;
+	private final int totalNumberOfPages;
+	
+	// tid and perm used for placeholders until later labs.
+	private final TransactionId tid = null;
+	private final Permissions perm = null;
+	
+	public HeapFileIterator(int tableId, int totalNumPages) {
+		this.tableId = tableId;
+		this.totalNumberOfPages = totalNumPages;
+		try {
+			currentPageIterator = getPageIterator(currentPage);
+		} catch (TransactionAbortedException e) {
+			e.printStackTrace();
+		} catch (DbException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	@Override
+	public void open() throws DbException, TransactionAbortedException {
+		if (openStatus) {
+			throw new DbException("Iterator already open.");
+		}
+		openStatus = true;
+	}
+
+	@Override
+	public void close() {
+		openStatus = false;
+	}
+	
+	@Override
+	public void rewind() throws DbException, TransactionAbortedException {
+		if (openStatus) {
+			currentPage = 0;
+			currentPageIterator = getPageIterator(currentPage);
+		}
+	}
+
+	@Override
+	protected Tuple readNext() throws DbException, TransactionAbortedException {
+		if (currentPageIterator.hasNext()) {
+			return currentPageIterator.next();
+		}
+		currentPage++;
+		if (currentPage > totalNumberOfPages) {
+			return null;
+		}
+		currentPageIterator = getPageIterator(currentPage);
+	}
+	
+	/**
+	 * Gets the iterator of the page with the specified number in the table.
+	 * 
+	 * @param pageNumber Number of the page to get the iterator of.
+	 * @return The iterator to iterate through all tuples of page with pageNumber.
+	 * @throws TransactionAbortedException
+	 * @throws DbException
+	 */
+	public Iterator<Tuple> getPageIterator(int pageNumber) throws TransactionAbortedException, DbException {
+		final PageId pageId = new HeapPageId(this.tableId, pageNumber);
+		final HeapPage page = (HeapPage) Database.getBufferPool().getPage(tid, pageId, perm);
+		return page.iterator();
+	}
+
+}
