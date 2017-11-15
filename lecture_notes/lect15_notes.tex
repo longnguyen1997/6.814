@@ -1,0 +1,64 @@
+\documentclass{article}
+
+\usepackage{geometry}
+\usepackage{parskip}
+
+\title{6.814 - Lecture 15, \emph{ARIES Recovery}}
+\author{Long Nguyen}
+
+\begin{document}
+
+\maketitle
+
+\section{Topics}
+
+Last time, we visited the idea that we can build a durable system through write-ahead logging. The log keeps track of states and actions that we can potentially redo or undo.
+
+\emph{Do we always need to write undo/redo states?} 
+
+Undo allows us to write dirty/uncommitted pages to disk (STEAL property). This makes buffer pool management easier.
+
+FORCE policy: forces pages to database before committing.
+
+\section{ARIES Goals}
+
+\begin{enumerate}
+    \item No-force, steal; support undo and redo.
+    \item Runtime efficiency, done through lightweight checkpoints.
+    \item Support for complex operations like indexes.
+    \item Crash recovery.
+\end{enumerate}
+
+\subsection{ARIES Phases}
+
+The phases are analysis, redo, and undo.
+
+\begin{enumerate}
+    \item Analysis: Going forward; how do we figure out what to redo?
+    \item Redo: Going forward; repeating history, uses physical log records.
+    \item Undo: Going backward; ``logical''.
+\end{enumerate}
+
+\textbf{Physical log record:} This kind of record gives physical instructions for how to complete an action. For example, \verb|Write `SAM' into bytes 3-6 of page 10|.
+
+\textbf{Logical log record:} This kind of record doesn't encode all the technical details. For example, \verb|Insert `SAM' into table `emp'|.
+
+\textbf{Redo:} We redo everything, even the loser transactions. When scanning through, we write everything we see in the log, even for transactions that may not have committed. The logic is similar to reapplying everything until the point during which the fatal crash happened. When we repeat history, we need to use physical log records because we want to maintain consistency. If we just go with the logical route, perhaps some modification already happened during the crash point. We have to write/update what we did exactly to the physical storage.
+
+\textbf{Undo:} We need to perform logical undos, because we need to consider the state of the database at the time we undo.
+
+\subsection{Log/Page Format}
+
+A log contains LSNs, sequential numbers to keep track of actions and states.
+
+Disk pages contain page LSNs, which are the last LSNs reflected in them.
+
+For redos, start at the minimum recovery LSN value, because anything prior to that recovery LSN is guaranteed to have been written and reflected on disk. On a high level, we pretty much redo everything. We redo an update \emph{unless}: page is not in the dirty page table (flushed prior to checkpoint), current LSN $<$ recovery LSN (page flushed and redirtied prior to checkpoint), current LSN $\leq$ page LSN.
+
+\subsection{Compensation Log Records}
+
+These log records are written before each undo operation. They tell us what we undid, and if we happen to crash during an undo phase, we can go back to these from the log. They redo the undos done during the redo phase of a crash recovery during the crash.
+
+You can think of CLRs as physical information logged about the logical undo operations done before, such that we can refer to this physical information to avoid repeating undo work.
+
+\end{document}
